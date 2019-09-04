@@ -1,3 +1,5 @@
+import { type } from "os";
+
 /* ДЗ 3 - работа с исключениями и отладчиком */
 
 /*
@@ -17,6 +19,25 @@
    isAllTrue([100, 2, 3, 4, 5], n => n < 10) // вернет false
  */
 function isAllTrue(array, fn) {
+    try {
+        if (!Array.isArray(array) || array.length === 0) {
+            throw new Error('empty array');
+        }
+        if (typeof fn !== 'function') {
+            throw new Error('fn is not a function');
+        }
+
+        for (const el of array) {
+            if (!fn(el)) {
+                return false;
+            }
+        }
+
+        return true;
+
+    } catch (err) {
+        throw err;
+    }
 }
 
 /*
@@ -36,6 +57,25 @@ function isAllTrue(array, fn) {
    isSomeTrue([1, 2, 3, 4, 5], n => n > 20) // вернет false
  */
 function isSomeTrue(array, fn) {
+    try {
+        if (!Array.isArray(array) || array.length === 0) {
+            throw new Error('empty array');
+        }
+        if (typeof fn !== 'function') {
+            throw new Error('fn is not a function');
+        }
+
+        for (const el of array) {
+            if (fn(el)) {
+                return true;
+            }
+        }
+
+        return false;
+
+    } catch (err) {
+        throw err;
+    }
 }
 
 /*
@@ -49,7 +89,27 @@ function isSomeTrue(array, fn) {
  3.3: Необходимо выбрасывать исключение в случаях:
    - fn не является функцией (с текстом "fn is not a function")
  */
-function returnBadArguments(fn) {
+function returnBadArguments(fn, ...args) {
+    const result = [];
+
+    try {
+        if (typeof fn !== 'function') {
+            throw new Error('fn is not a function');
+        }
+
+        args.forEach(el => {
+            try {
+                fn(el);
+            } catch (err) {
+                result.push(el);
+            }
+        })
+
+        return result;
+
+    } catch (err) {
+        throw err;
+    }
 }
 
 /*
@@ -69,7 +129,11 @@ function returnBadArguments(fn) {
    - number не является числом (с текстом "number is not a number")
    - какой-либо из аргументов div является нулем (с текстом "division by 0")
  */
-function calculator() {
+function calculator(number = 0) {
+    return {
+        sum: (...args) => args.reduce((acc, cur) => acc + cur, number),
+        dif: (...args) => args.reduce((acc, cur) => acc - cur, number),
+    }
 }
 
 /* При решении задач, пострайтесь использовать отладчик */
