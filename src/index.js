@@ -130,9 +130,26 @@ function returnBadArguments(fn, ...args) {
    - какой-либо из аргументов div является нулем (с текстом "division by 0")
  */
 function calculator(number = 0) {
-    return {
-        sum: (...args) => args.reduce((acc, cur) => acc + cur, number),
-        dif: (...args) => args.reduce((acc, cur) => acc - cur, number),
+    try {
+
+        if (typeof number !== 'number') {
+            throw new Error('number is not a number');
+        }
+
+        return {
+            sum: (...args) => args.reduce((acc, cur) => acc + cur, number),
+            dif: (...args) => args.reduce((acc, cur) => acc - cur, number),
+            div: (...args) => {
+                if (args.includes(0)) {
+                    throw new Error('division by 0');
+                }
+
+                return args.reduce((acc, cur) => acc / cur, number)
+            },
+            mul: (...args) => args.reduce((acc, cur) => acc * cur, number),
+        }
+    } catch (err) {
+        throw err;
     }
 }
 
