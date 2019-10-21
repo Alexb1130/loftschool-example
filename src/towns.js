@@ -1,3 +1,5 @@
+import { resolve } from "url";
+
 /*
  Страница должна предварительно загрузить список городов из
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
@@ -37,6 +39,37 @@ const homeworkContainer = document.querySelector('#homework-container');
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
 function loadTowns() {
+    return new Promise((resolve, reject) => {
+        fetch('https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json')
+            .then(response => response.json())
+            .then(towns => resolve(towns.sort((a, b) => a.name > b.name ? 1 : -1)))
+            .catch(e => reject());
+    })
+}
+
+function townsFiltered(data) {
+    loadingBlock.style.display = 'none';
+    filterBlock.style.display = 'block';
+    const fragment = document.createDocumentFragment();
+
+    filterInput.addEventListener('keyup', function () {
+        let matches = data.filter(town => isMatching(town.name, this.value));
+
+        matches.forEach(({ name }) => {
+            const div = document.createElement('div');
+
+            div.textContent = name;
+
+            fragment.append(div);
+        });
+
+        if (!this.value) {
+            filterResult.innerHTML = '';
+        } else {
+            filterResult.innerHTML = '';
+            filterResult.append(fragment);
+        }
+    });
 }
 
 /*
@@ -51,6 +84,7 @@ function loadTowns() {
    isMatching('Moscow', 'Moscov') // false
  */
 function isMatching(full, chunk) {
+    return new RegExp(chunk, 'i').test(full);
 }
 
 /* Блок с надписью "Загрузка" */
@@ -62,9 +96,23 @@ const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
 
-filterInput.addEventListener('keyup', function() {
-    // это обработчик нажатия кливиш в текстовом поле
-});
+loadTowns()
+    .then(towns => townsFiltered(towns))
+    .catch(e => {
+        const errorMessage = 'Не удалось загрузить города';
+        const loadButton = document.createElement('button');
+
+        loadButton.textContent = 'Повторить';
+        loadingBlock.textContent = errorMessage;
+
+        loadingBlock.append(loadButton);
+
+        loadButton.addEventListener('click', () => {
+            loadTowns()
+                .then(towns => townsFiltered(towns))
+        });
+
+    })
 
 export {
     loadTowns,
