@@ -43,10 +43,88 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
+function deleteCookie(name) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+function deleteRow(row) {
+    row.remove();
+}
+
+function isMatching(full, chunk) {
+    return new RegExp(chunk, 'i').test(full);
+}
+
+function createCookieRow(name, value) {
+    const row = document.createElement('tr');
+    const cellName = document.createElement('th');
+    const cellValue = document.createElement('th');
+    const cellBtn = document.createElement('th');
+    const deleteBtn = document.createElement('button');
+
+    cellName.textContent = name;
+    cellName.dataset.name = name;
+    cellValue.textContent = value;
+    deleteBtn.textContent = 'X';
+
+    deleteBtn.addEventListener('click', () => {
+        deleteRow(row);
+        deleteCookie(name);
+    })
+
+    cellBtn.append(deleteBtn);
+
+    row.append(cellName, cellValue, cellBtn);
+
+    listTable.append(row);
+}
+
+function renderCookieRow() {
+    if (!document.cookie) {
+        return;
+    }
+
+    document.cookie.split(';').forEach(cookie => {
+        const [name, value] = cookie.split('=');
+
+        createCookieRow(name.trim(), value.trim());
+    })
+}
+
+renderCookieRow();
+
 filterNameInput.addEventListener('keyup', function() {
-    // здесь можно обработать нажатия на клавиши внутри текстового поля для фильтрации cookie
+
+    const matchingCookies = document.cookie.split(';').filter(cookie => isMatching(cookie, this.value));
+    
+    listTable.innerHTML = '';
+
+    matchingCookies.forEach(cookie => {
+        const [name, value] = cookie.split('=');
+
+        createCookieRow(name.trim(), value.trim());
+    });
+    
 });
 
 addButton.addEventListener('click', () => {
-    // здесь можно обработать нажатие на кнопку "добавить cookie"
+    if (addNameInput.value && addValueInput.value) {
+        document.cookie = `${addNameInput.value}=${addValueInput.value}`;
+
+        const matchesName = listTable.querySelector(`th[data-name="${addNameInput.value}"]`);
+
+        if (matchesName) {
+            const matchesNameValue = matchesName.nextElementSibling;
+            
+            matchesNameValue.textContent = addValueInput.value;
+        } else {
+            createCookieRow(addNameInput.value, addValueInput.value);
+        }
+
+        addNameInput.value = '';
+        addValueInput.value = '';
+        addNameInput.focus();
+    } else {
+        alert('заполните все поля');
+    }
 });
